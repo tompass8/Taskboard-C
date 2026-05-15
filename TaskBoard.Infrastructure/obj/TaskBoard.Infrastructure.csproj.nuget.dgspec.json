@@ -1,40 +1,33 @@
 {
   "format": 1,
   "restore": {
-    "C:\\YNOV\\B2\\C#\\Project_TrelloBis\\Taskboard-C-\\TaskBoard.Infrastructure\\TaskBoard.Infrastructure.csproj": {}
+    "C:\\Users\\Tom Passerman\\RiderProjects\\Taskboard-C\\TaskBoard.Infrastructure\\TaskBoard.Infrastructure.csproj": {}
   },
   "projects": {
-    "C:\\YNOV\\B2\\C#\\Project_TrelloBis\\Taskboard-C-\\TaskBoard.Application\\TaskBoard.Application.csproj": {
+    "C:\\Users\\Tom Passerman\\RiderProjects\\Taskboard-C\\TaskBoard.Application\\TaskBoard.Application.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\YNOV\\B2\\C#\\Project_TrelloBis\\Taskboard-C-\\TaskBoard.Application\\TaskBoard.Application.csproj",
+        "projectUniqueName": "C:\\Users\\Tom Passerman\\RiderProjects\\Taskboard-C\\TaskBoard.Application\\TaskBoard.Application.csproj",
         "projectName": "TaskBoard.Application",
-        "projectPath": "C:\\YNOV\\B2\\C#\\Project_TrelloBis\\Taskboard-C-\\TaskBoard.Application\\TaskBoard.Application.csproj",
-        "packagesPath": "C:\\Users\\Dels\\.nuget\\packages\\",
-        "outputPath": "C:\\YNOV\\B2\\C#\\Project_TrelloBis\\Taskboard-C-\\TaskBoard.Application\\obj\\",
+        "projectPath": "C:\\Users\\Tom Passerman\\RiderProjects\\Taskboard-C\\TaskBoard.Application\\TaskBoard.Application.csproj",
+        "packagesPath": "C:\\Users\\Tom Passerman\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Tom Passerman\\RiderProjects\\Taskboard-C\\TaskBoard.Application\\obj\\",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
         "configFilePaths": [
-          "C:\\Users\\Dels\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+          "C:\\Users\\Tom Passerman\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net10.0"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
           "net10.0": {
             "targetAlias": "net10.0",
             "projectReferences": {
-              "C:\\YNOV\\B2\\C#\\Project_TrelloBis\\Taskboard-C-\\TaskBoard.Domain\\TaskBoard.Domain.csproj": {
-                "projectPath": "C:\\YNOV\\B2\\C#\\Project_TrelloBis\\Taskboard-C-\\TaskBoard.Domain\\TaskBoard.Domain.csproj"
+              "C:\\Users\\Tom Passerman\\RiderProjects\\Taskboard-C\\TaskBoard.Domain\\TaskBoard.Domain.csproj": {
+                "projectPath": "C:\\Users\\Tom Passerman\\RiderProjects\\Taskboard-C\\TaskBoard.Domain\\TaskBoard.Domain.csproj"
               }
             }
           }
@@ -70,7 +63,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.201/PortableRuntimeIdentifierGraph.json",
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.203/PortableRuntimeIdentifierGraph.json",
           "packagesToPrune": {
             "Microsoft.CSharp": "(,4.7.32767]",
             "Microsoft.VisualBasic": "(,10.4.32767]",
@@ -348,29 +341,22 @@
         }
       }
     },
-    "C:\\YNOV\\B2\\C#\\Project_TrelloBis\\Taskboard-C-\\TaskBoard.Domain\\TaskBoard.Domain.csproj": {
+    "C:\\Users\\Tom Passerman\\RiderProjects\\Taskboard-C\\TaskBoard.Domain\\TaskBoard.Domain.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\YNOV\\B2\\C#\\Project_TrelloBis\\Taskboard-C-\\TaskBoard.Domain\\TaskBoard.Domain.csproj",
+        "projectUniqueName": "C:\\Users\\Tom Passerman\\RiderProjects\\Taskboard-C\\TaskBoard.Domain\\TaskBoard.Domain.csproj",
         "projectName": "TaskBoard.Domain",
-        "projectPath": "C:\\YNOV\\B2\\C#\\Project_TrelloBis\\Taskboard-C-\\TaskBoard.Domain\\TaskBoard.Domain.csproj",
-        "packagesPath": "C:\\Users\\Dels\\.nuget\\packages\\",
-        "outputPath": "C:\\YNOV\\B2\\C#\\Project_TrelloBis\\Taskboard-C-\\TaskBoard.Domain\\obj\\",
+        "projectPath": "C:\\Users\\Tom Passerman\\RiderProjects\\Taskboard-C\\TaskBoard.Domain\\TaskBoard.Domain.csproj",
+        "packagesPath": "C:\\Users\\Tom Passerman\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Tom Passerman\\RiderProjects\\Taskboard-C\\TaskBoard.Domain\\obj\\",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
         "configFilePaths": [
-          "C:\\Users\\Dels\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+          "C:\\Users\\Tom Passerman\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net10.0"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -410,7 +396,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.201/PortableRuntimeIdentifierGraph.json",
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.203/PortableRuntimeIdentifierGraph.json",
           "packagesToPrune": {
             "Microsoft.CSharp": "(,4.7.32767]",
             "Microsoft.VisualBasic": "(,10.4.32767]",
@@ -688,37 +674,30 @@
         }
       }
     },
-    "C:\\YNOV\\B2\\C#\\Project_TrelloBis\\Taskboard-C-\\TaskBoard.Infrastructure\\TaskBoard.Infrastructure.csproj": {
+    "C:\\Users\\Tom Passerman\\RiderProjects\\Taskboard-C\\TaskBoard.Infrastructure\\TaskBoard.Infrastructure.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\YNOV\\B2\\C#\\Project_TrelloBis\\Taskboard-C-\\TaskBoard.Infrastructure\\TaskBoard.Infrastructure.csproj",
+        "projectUniqueName": "C:\\Users\\Tom Passerman\\RiderProjects\\Taskboard-C\\TaskBoard.Infrastructure\\TaskBoard.Infrastructure.csproj",
         "projectName": "TaskBoard.Infrastructure",
-        "projectPath": "C:\\YNOV\\B2\\C#\\Project_TrelloBis\\Taskboard-C-\\TaskBoard.Infrastructure\\TaskBoard.Infrastructure.csproj",
-        "packagesPath": "C:\\Users\\Dels\\.nuget\\packages\\",
-        "outputPath": "C:\\YNOV\\B2\\C#\\Project_TrelloBis\\Taskboard-C-\\TaskBoard.Infrastructure\\obj\\",
+        "projectPath": "C:\\Users\\Tom Passerman\\RiderProjects\\Taskboard-C\\TaskBoard.Infrastructure\\TaskBoard.Infrastructure.csproj",
+        "packagesPath": "C:\\Users\\Tom Passerman\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Tom Passerman\\RiderProjects\\Taskboard-C\\TaskBoard.Infrastructure\\obj\\",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
         "configFilePaths": [
-          "C:\\Users\\Dels\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+          "C:\\Users\\Tom Passerman\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net10.0"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
           "net10.0": {
             "targetAlias": "net10.0",
             "projectReferences": {
-              "C:\\YNOV\\B2\\C#\\Project_TrelloBis\\Taskboard-C-\\TaskBoard.Application\\TaskBoard.Application.csproj": {
-                "projectPath": "C:\\YNOV\\B2\\C#\\Project_TrelloBis\\Taskboard-C-\\TaskBoard.Application\\TaskBoard.Application.csproj"
+              "C:\\Users\\Tom Passerman\\RiderProjects\\Taskboard-C\\TaskBoard.Application\\TaskBoard.Application.csproj": {
+                "projectPath": "C:\\Users\\Tom Passerman\\RiderProjects\\Taskboard-C\\TaskBoard.Application\\TaskBoard.Application.csproj"
               }
             }
           }
@@ -747,7 +726,7 @@
             },
             "Microsoft.EntityFrameworkCore.Sqlite": {
               "target": "Package",
-              "version": "[10.0.5, )"
+              "version": "[10.0.8, )"
             }
           },
           "imports": [
@@ -766,7 +745,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.201/PortableRuntimeIdentifierGraph.json",
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.203/PortableRuntimeIdentifierGraph.json",
           "packagesToPrune": {
             "Microsoft.CSharp": "(,4.7.32767]",
             "Microsoft.VisualBasic": "(,10.4.32767]",
