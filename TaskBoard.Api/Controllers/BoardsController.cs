@@ -26,15 +26,15 @@ public class BoardsController : ControllerBase
 
     // POST: api/boards
     [HttpPost]
-    public async Task<IActionResult> CreateBoard([FromBody] string name)
+    public async Task<IActionResult> CreateBoard([FromBody] string title)
     {
-        if (string.IsNullOrWhiteSpace(name))
-            return BadRequest("Le nom du tableau est requis.");
+        if (string.IsNullOrWhiteSpace(title))
+            return BadRequest("Titre du tableau requis.");
 
-        var board = new Board { Name = name };
+        var board = new Board { Title = title };
         _context.Boards.Add(board);
         await _context.SaveChangesAsync();
 
-        return CreatedAtAction(nameof(GetBoards), new { id = board.Id }, board);
+        return CreatedAtAction(nameof(GetBoards), new { id = board.ID }, board);
     }
 }
