@@ -19,4 +19,5 @@ public class User
     public ICollection<BoardMembership> BoardMemberships { get; set; } = new List<BoardMembership>();
     public ICollection<Card> AssignedCards { get; set; } = new List<Card>();
     public ICollection<Activity> Activities { get; set; } = new List<Activity>();
+    public ICollection<Board> OwnedBoards { get; set; } = new List<Board>();
 }
