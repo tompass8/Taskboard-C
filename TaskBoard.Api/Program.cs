@@ -2,8 +2,8 @@ using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi;using
-    TaskBoard.Application.Interfaces;
+using Microsoft.OpenApi;
+using TaskBoard.Application.Interfaces;
 using TaskBoard.Application.Services;
 using TaskBoard.Infrastructure.Data;
 using TaskBoard.Infrastructure.Repositories;
@@ -20,12 +20,14 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 // 2. INJECTION DES DÉPENDANCES (Nos contrats)
 // ==========================================
 // C'est ici qu'on dit à l'API quel code utiliser quand un contrôleur demande une interface
-//builder.Services.AddScoped<IUserRepository, UserRepository>();
-//builder.Services.AddScoped<IAuthService, AuthService>();
+//builder.Services.AddScoped<IUserRepository, UserRepository>() ;
+//builder.Services.AddScoped<IAuthService, AuthService>() ;
 builder.Services.AddScoped<IWorkspaceRepository, WorkspaceRepository>();
 builder.Services.AddScoped<IWorkspaceService, WorkspaceService>();
 builder.Services.AddScoped<IBoardRepository, BoardRepository>();
 builder.Services.AddScoped<IBoardService, BoardService>();
+builder.Services.AddScoped<IListRepository, ListRepository>();
+builder.Services.AddScoped<IListService, ListService>();
 
 // ==========================================
 // 3. CONFIGURATION CORS
