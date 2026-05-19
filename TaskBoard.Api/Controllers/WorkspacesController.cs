@@ -6,7 +6,7 @@ using TaskBoard.Application.Interfaces;
 
 namespace TaskBoard.Api.Controllers;
 
-[Authorize] // Le bouclier de sécurité est de retour
+[Authorize]
 [ApiController]
 [Route("api/[controller]")]
 public class WorkspacesController : ControllerBase
@@ -21,9 +21,10 @@ public class WorkspacesController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetMyWorkspaces()
     {
-        // On extrait le vrai ID de l'utilisateur depuis son jeton JWT
         var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (!Guid.TryParse(userIdString, out Guid userId))
+        
+        // 1. On transforme la chaîne du Token en 'int' (entier)
+        if (!int.TryParse(userIdString, out int userId))
             return Unauthorized("Token invalide ou utilisateur introuvable.");
 
         var workspaces = await _workspaceService.GetUserWorkspacesAsync(userId);
@@ -37,11 +38,14 @@ public class WorkspacesController : ControllerBase
             return BadRequest(ModelState);
 
         var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (!Guid.TryParse(userIdString, out Guid userId))
+        
+        // 2. Pareil ici, on passe en 'int'
+        if (!int.TryParse(userIdString, out int userId))
             return Unauthorized("Token invalide.");
 
         var newWorkspace = await _workspaceService.CreateWorkspaceAsync(request, userId);
         
-        return CreatedAtAction(nameof(GetMyWorkspaces), new { id = newWorkspace.Id }, newWorkspace);
+        // 3. On utilise .ID (majuscule) pour coller au code de Lucas
+        return CreatedAtAction(nameof(GetMyWorkspaces), new { id = newWorkspace.ID }, newWorkspace);
     }
 }

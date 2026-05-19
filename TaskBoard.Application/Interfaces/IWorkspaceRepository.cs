@@ -4,8 +4,7 @@ namespace TaskBoard.Application.Interfaces;
 
 public interface IWorkspaceRepository
 {
-    Task<IEnumerable<Workspace>> GetWorkspacesByUserIdAsync(Guid userId);
-    Task<Workspace?> GetByIdAsync(Guid id);
+    Task<IEnumerable<Workspace>> GetUserWorkspacesAsync(int userId); // Guid remplacé par int
     Task AddAsync(Workspace workspace);
     Task SaveChangesAsync();
 }

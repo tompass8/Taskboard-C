@@ -8,52 +8,41 @@ public class WorkspaceService : IWorkspaceService
 {
     private readonly IWorkspaceRepository _workspaceRepository;
 
-    // L'injection de dépendance : le service demande un accès au repository
     public WorkspaceService(IWorkspaceRepository workspaceRepository)
     {
         _workspaceRepository = workspaceRepository;
     }
 
-    public async Task<IEnumerable<WorkspaceDto>> GetUserWorkspacesAsync(Guid userId)
+    public async Task<IEnumerable<WorkspaceDto>> GetUserWorkspacesAsync(int userId)
     {
-        // 1. On va chercher les données brutes
-        var workspaces = await _workspaceRepository.GetWorkspacesByUserIdAsync(userId);
-
-        // 2. On les transforme en DTOs légers pour le frontend
+        var workspaces = await _workspaceRepository.GetUserWorkspacesAsync(userId);
         return workspaces.Select(w => new WorkspaceDto
         {
-            Id = w.Id,
+            ID = w.ID, // Modifié selon le code de Lucas
             Name = w.Name,
-            Description = w.Description,
-            OwnerId = w.OwnerId,
-            CreatedAt = w.CreatedAt
+            Description = w.Description
         });
     }
 
-    public async Task<WorkspaceDto> CreateWorkspaceAsync(CreateWorkspaceRequest request, Guid userId)
+    public async Task<WorkspaceDto> CreateWorkspaceAsync(CreateWorkspaceRequest request, int userId)
     {
-        // 1. On crée la "vraie" entité à partir de la requête (le DTO d'entrée)
         var workspace = new Workspace
         {
-            Id = Guid.NewGuid(), // On génère un nouvel identifiant unique
             Name = request.Name,
-            Description = request.Description,
-            OwnerId = userId,
-            CreatedAt = DateTime.UtcNow // On fixe la date de création à maintenant
+            Description = request.Description
+            // Id, OwnerId et CreatedAt ont été retirés
         };
 
-        // 2. On demande au Repository de sauvegarder ça en base de données
+        // Note pour plus tard : Il faudra lier le userId via la table WorkspaceMembership ici !
+
         await _workspaceRepository.AddAsync(workspace);
         await _workspaceRepository.SaveChangesAsync();
 
-        // 3. On renvoie le résultat propre (le DTO de sortie)
         return new WorkspaceDto
         {
-            Id = workspace.Id,
+            ID = workspace.ID,
             Name = workspace.Name,
-            Description = workspace.Description,
-            OwnerId = workspace.OwnerId,
-            CreatedAt = workspace.CreatedAt
+            Description = workspace.Description
         };
     }
 }

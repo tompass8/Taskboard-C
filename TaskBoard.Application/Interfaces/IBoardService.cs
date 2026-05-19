@@ -4,9 +4,8 @@ namespace TaskBoard.Application.Interfaces;
 
 public interface IBoardService
 {
-    // L'API demandera la liste des tableaux propres (BoardDto) d'un espace de travail
     Task<IEnumerable<BoardDto>> GetBoardsByWorkspaceIdAsync(int workspaceId);
     
-    // L'API demandera de créer un tableau en fournissant le formulaire (Request) et l'ID du créateur
-    Task<BoardDto> CreateBoardAsync(CreateBoardRequest request, int userId);
+    // Attention ici : on repasse le userId en Guid pour coller à OwnerID !
+    Task<BoardDto> CreateBoardAsync(CreateBoardRequest request, Guid userId);
 }
