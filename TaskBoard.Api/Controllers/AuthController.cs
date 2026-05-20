@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TaskBoard.Application.DTOs;
 using TaskBoard.Application.Interfaces;
@@ -9,13 +10,15 @@ namespace TaskBoard.Api.Controllers;
 public class AuthController : ControllerBase
 {
     private readonly IAuthService _authService;
+    private readonly IWebHostEnvironment _env;
 
-    public AuthController(IAuthService authService)
+
+    public AuthController(IAuthService authService, IWebHostEnvironment env)
     {
         _authService = authService;
+        _env = env;
     }
 
-    // Créer un nouveau compte utilisateur
     [HttpPost("register")]
     [ProducesResponseType(typeof(AuthResponse), 201)]
     public async Task<IActionResult> Register([FromBody] RegisterRequest request)
@@ -24,12 +27,34 @@ public class AuthController : ControllerBase
         return StatusCode(201, response);
     }
 
-    // Se connecter et récupérer un token JWT
     [HttpPost("login")]
-    [ProducesResponseType(typeof(AuthResponse), 200)]
     public async Task<IActionResult> Login([FromBody] LoginRequest request)
     {
         var response = await _authService.LoginAsync(request);
-        return StatusCode(200, response);
+        
+        Response.Cookies.Append("jwt", response.Token, new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = !_env.IsDevelopment(),
+            SameSite =  SameSiteMode.Strict,
+            Expires = DateTimeOffset.Now.AddMinutes(30)
+        });
+        
+        return Ok(new { response.Username, response.UserID });
+    }
+    
+    [HttpPost("logout")]
+    [Authorize]
+    public IActionResult Logout()
+    {
+        Response.Cookies.Append("jwt", "", new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = !_env.IsDevelopment(),
+            SameSite = SameSiteMode.Strict,
+            Expires = DateTimeOffset.Now.AddDays(-1) // past datetime = deletion
+        });
+
+        return Ok(new { message = "Déconnexion réussie." });
     }
 }

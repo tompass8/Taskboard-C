@@ -51,6 +51,15 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
                 (builder.Configuration["Jwt:Key"]!)),
         ClockSkew = TimeSpan.Zero // delete 5min time tolerance
     };
+    
+    options.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = context =>
+        {
+            context.Token = context.Request.Cookies["jwt"];
+            return Task.CompletedTask;
+        }
+    };
 });
 
 // Controllers
