@@ -79,7 +79,7 @@ public class AuthService : IAuthService
 
     public async Task<AuthResponse> RegisterAsync(RegisterRequest request)
     {
-        if (await _userRepository.ExistsByEmailAsync(request.Email))
+        if (await _userRepository.ExistsUserByEmailAsync(request.Email))
             throw new InvalidOperationException("Email already in use");
 
         var user = new User
@@ -89,13 +89,13 @@ public class AuthService : IAuthService
             PasswordHash = _passwordHasher.Hash(request.Password)
         };
 
-        var created = await _userRepository.CreateAsync(user);
+        var created = await _userRepository.CreateUserAsync(user);
         return new AuthResponse(GenerateToken(created), created.Username, created.ID);
     }
 
     public async Task<AuthResponse> LoginAsync(LoginRequest request)
     {
-        var user = await _userRepository.GetByEmailAsync(request.Email)
+        var user = await _userRepository.GetUserByEmailAsync(request.Email)
             ?? throw new UnauthorizedAccessException("Invalid Email or Password");
         
         if (!_passwordHasher.Verify(request.Password, user.PasswordHash))

@@ -1,11 +1,10 @@
-﻿
-using TaskBoard.Domain.Entities;
+﻿using TaskBoard.Domain.Entities;
 
 namespace TaskBoard.Domain.Interfaces;
 
 public interface IUserRepository
 {
-    Task<User?> GetByEmailAsync(string email);
-    Task<bool> ExistsByEmailAsync(string email);
-    Task<User> CreateAsync(User user);
+    Task<User?> GetUserByEmailAsync(string email);
+    Task<bool> ExistsUserByEmailAsync(string email);
+    Task<User> CreateUserAsync(User user);
 }

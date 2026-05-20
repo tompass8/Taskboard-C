@@ -1,6 +1,6 @@
 using TaskBoard.Domain.Interfaces;
 
-namespace TaskBoard.Infrasture.Services;
+namespace TaskBoard.Infrastructure.Services;
 
 // BCrypt is confined here
 

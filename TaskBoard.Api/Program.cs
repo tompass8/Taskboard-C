@@ -1,9 +1,13 @@
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using TaskBoard.Infrastructure.Data;
 using TaskBoard.Application.Interfaces;
 using TaskBoard.Application.Services;
 using TaskBoard.Domain.Interfaces;
-using TaskBoard.Infrasture.Services;
+using TaskBoard.Infrastructure.Repositories;
+using TaskBoard.Infrastructure.Services;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,25 +16,51 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
     {
-        policy.AllowAnyOrigin()
+        policy
+            .AllowAnyOrigin()
             .AllowAnyMethod()
             .AllowAnyHeader();
     });
 });
-// Ajout des contrôleurs
-builder.Services.AddControllers();
 
-// Configuration de Swagger/OpenAPI
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+// DbContext injection (SQLite pour le développement)
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Ajout du Système de Cryptage de mot de passe
+// Repositories
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+
+// Crypting system for password (BCrypt)
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 
-// Injection du DbContext (SQLite pour le développement)
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+// JWT Authentification
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = builder.Configuration["Jwt:Issuer"],
+        ValidAudience = builder.Configuration["Jwt:Audience"],
+        IssuerSigningKey = new SymmetricSecurityKey
+            (Encoding.UTF8.GetBytes
+                (builder.Configuration["Jwt:Key"]!)),
+        ClockSkew = TimeSpan.Zero // delete 5min time tolerance
+    };
+});
+
+// Controllers
+builder.Services.AddControllers();
+
+// Swagger/OpenAPI configuration
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+// SignalR
+builder.Services.AddSignalR();
 
 var app = builder.Build();
 
@@ -40,8 +70,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 app.UseCors("AllowAll");
-
 app.UseHttpsRedirection();
-app.MapControllers(); // Mapper les routes des contrôleurs
+app.UseAuthentication(); // Must be BEFORE Authorization
+app.UseAuthorization(); // Must be AFTER Authentification
+app.MapControllers();
 
 app.Run();
