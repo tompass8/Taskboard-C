@@ -2,6 +2,7 @@ using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using TaskBoard.Api.Middleware;
 using TaskBoard.Infrastructure.Data;
 using TaskBoard.Application.Interfaces;
 using TaskBoard.Application.Services;
@@ -69,6 +70,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseMiddleware<ErrorHandlingMiddleware>();
 app.UseCors("AllowAll");
 app.UseHttpsRedirection();
 app.UseAuthentication(); // Must be BEFORE Authorization

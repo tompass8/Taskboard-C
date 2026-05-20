@@ -15,33 +15,21 @@ public class AuthController : ControllerBase
         _authService = authService;
     }
 
+    // Créer un nouveau compte utilisateur
     [HttpPost("register")]
     [ProducesResponseType(typeof(AuthResponse), 201)]
     public async Task<IActionResult> Register([FromBody] RegisterRequest request)
     {
-        try
-        {
-            var response = await _authService.RegisterAsync(request);
-            return StatusCode(201, response);
-        }
-        catch (InvalidOperationException e)
-        {
-            return Conflict(e.Message);
-        }
+        var response = await _authService.RegisterAsync(request);
+        return StatusCode(201, response);
     }
 
+    // Se connecter et récupérer un token JWT
     [HttpPost("login")]
     [ProducesResponseType(typeof(AuthResponse), 200)]
     public async Task<IActionResult> Login([FromBody] LoginRequest request)
     {
-        try
-        {
-            var response = await _authService.LoginAsync(request);
-            return StatusCode(200, response);
-        }
-        catch (UnauthorizedAccessException e)
-        {
-            return Conflict(e.Message);
-        }
+        var response = await _authService.LoginAsync(request);
+        return StatusCode(200, response);
     }
 }
