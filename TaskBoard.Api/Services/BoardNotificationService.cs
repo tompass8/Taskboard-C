@@ -6,19 +6,22 @@ namespace TaskBoard.Api.Services;
 
 public class BoardNotificationService : IBoardNotificationService
 {
+    private readonly IHubContext<BoardHub> _hubContext;
+    
+    /// <summary>
+    /// Centralise l'envoi des notifications SignalR pour un tableau spécifique.
+    /// </summary>
     private async Task SendAsync(int boardID, string method, object data)
         => await _hubContext.Clients
             .Group($"board_{boardID}")
             .SendAsync(method, data);
-    
-    private readonly IHubContext<BoardHub> _hubContext;
 
     public BoardNotificationService(IHubContext<BoardHub> hubContext)
     {
         _hubContext = hubContext;
     }
     
-    // Card
+    // --- Actions sur les Cartes ---
     public async Task NotifyCardCreated(int boardID, object card)
         => await SendAsync(boardID, "CardCreated", card);
 
@@ -31,7 +34,7 @@ public class BoardNotificationService : IBoardNotificationService
     public async Task NotifyCardDeleted(int boardID, object card)
         => await SendAsync(boardID, "CardDeleted", card);
     
-    //List
+    // --- Actions sur les Listes ---
     public async Task NotifyListCreated(int boardID, object list)
         => await SendAsync(boardID, "ListCreated", list);
 
@@ -42,5 +45,5 @@ public class BoardNotificationService : IBoardNotificationService
         => await SendAsync(boardID, "ListMoved", list);
 
     public async Task NotifyListDeleted(int boardID, object list)
-        => await SendAsync(boardID, "ListDeleted", new { list, boardID });
+        => await SendAsync(boardID, "ListDeleted", list);
 }

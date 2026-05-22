@@ -1,31 +1,25 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using TaskBoard.Application.Interfaces;
 using TaskBoard.Application.DTOs;
-
+using TaskBoard.Application.Interfaces; // Essentiel pour voir IBoardService
 
 namespace TaskBoard.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
 [Authorize]
-public class BoardsController : ControllerBase
+public class BoardsController : ControllerBase // Corrigé : ControllerBase au lieu de ControllerBaseHub
 {
+    // On injecte le service applicatif à la place du DbContext
     private readonly IBoardService _boardService;
-    private readonly IBoardNotificationService _notificationService;
 
-    public BoardsController
-        (
-        IBoardService boardService,
-        IBoardNotificationService notificationService
-        )
+    public BoardsController(IBoardService boardService)
     {
         _boardService = boardService;
-        _notificationService = notificationService;
     }
 
-    [HttpGet("{workspaceId:int}")]
-    public async Task<IActionResult> GetBoards(int workspaceId)
+    [HttpGet("workspace/{workspaceId}")]
+    public async Task<IActionResult> GetBoardsByWorkspace(int workspaceId)
     {
         var boards = await _boardService.GetBoardsByWorkspaceAsync(workspaceId);
         return Ok(boards);
@@ -34,21 +28,25 @@ public class BoardsController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> CreateBoard([FromBody] CreateBoardRequest request)
     {
-        var board = await _boardService.CreateBoardAsync(request);
-        await _notificationService.NotifyCardCreated(board.ID, board);
-        return StatusCode(201, board);
+        var createdBoard = await _boardService.CreateBoardAsync(request);
+        
+        // Renvoie un code 201 Created avec le DTO de réponse
+        return CreatedAtAction(nameof(GetBoardsByWorkspace), new { workspaceId = createdBoard.WorkspaceID }, createdBoard);
     }
 
-    [HttpPatch("{id:int}")]
+    [HttpPut("{id}")]
     public async Task<IActionResult> UpdateBoard(int id, [FromBody] UpdateBoardRequest request)
     {
-        var board = await _boardService.UpdateBoardAsync(id, request);
-        return Ok(board);
+        var updatedBoard = await _boardService.UpdateBoardAsync(id, request);
+        if (updatedBoard == null) return NotFound();
+
+        return Ok(updatedBoard);
     }
 
-    [HttpDelete("{id:int}")]
+    [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteBoard(int id)
     {
+        // Optionnel : Tu peux ajouter une méthode de vérification d'existence ou laisser le service gérer
         await _boardService.DeleteBoardAsync(id);
         return NoContent();
     }

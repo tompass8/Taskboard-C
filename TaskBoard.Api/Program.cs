@@ -26,12 +26,20 @@ builder.Services.AddCors(options =>
     });
 });
 
-// DbContext injection (SQLite pour le développement)
+// Injection existante de DbContext
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Repositories
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IBoardRepository, BoardRepository>();
+builder.Services.AddScoped<IListRepository, ListRepository>();
+builder.Services.AddScoped<ICardRepository, CardRepository>();
+
+// Services
+builder.Services.AddScoped<IBoardService, BoardService>();
+builder.Services.AddScoped<IListService, ListService>();
+builder.Services.AddScoped<ICardService, CardService>();
 
 // Crypting system for password (BCrypt)
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
@@ -51,7 +59,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
         IssuerSigningKey = new SymmetricSecurityKey
             (Encoding.UTF8.GetBytes
                 (builder.Configuration["Jwt:Key"]!)),
-        ClockSkew = TimeSpan.Zero // delete 5min time tolerance
+        ClockSkew = TimeSpan.Zero, // delete 5min time tolerance
+        NameClaimType = "username"
     };
     
     options.Events = new JwtBearerEvents
@@ -75,6 +84,9 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
 // Controllers
 builder.Services.AddControllers();
 
+// Notification Board Hub
+builder.Services.AddScoped<IBoardNotificationService, BoardNotificationService>();
+
 // Swagger/OpenAPI configuration
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -90,8 +102,6 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-// Notification Board Hub
-builder.Services.AddScoped<IBoardNotificationService, BoardNotificationService>();
 
 app.UseMiddleware<ErrorHandlingMiddleware>();
 app.UseCors("AllowAll");
