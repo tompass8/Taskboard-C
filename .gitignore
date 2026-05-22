@@ -1,0 +1,31 @@
+# ==========================================
+# TaskBoard - GitIgnore (Rider / .NET Core)
+# ==========================================
+
+# 1. Fichiers de build .NET (Le plus important !)
+bin/
+obj/
+TestResults/
+*.binlog
+
+# 2. Base de données SQLite (Pour ne pas écraser la BDD locale de l'équipe)
+*.db
+*.db-shm
+*.db-wal
+
+# 3. JetBrains Rider & IntelliJ (Ton éditeur)
+.idea/
+*.sln.iml
+*.user
+*.userprefs
+
+# 4. Fichiers secrets et configuration locale
+.env
+appsettings.Development.json
+*.userosscache
+
+# 5. Fichiers système (Windows / Mac)
+.DS_Store
+Thumbs.db
+$RECYCLE.BIN/
+[Dd]esktop.ini
