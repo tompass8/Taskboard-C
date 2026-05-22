@@ -3,10 +3,12 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using TaskBoard.Api.Middleware;
-using TaskBoard.Infrastructure.Data;
+using TaskBoard.Api.Hubs;
+using TaskBoard.Api.Services;
 using TaskBoard.Application.Interfaces;
 using TaskBoard.Application.Services;
 using TaskBoard.Domain.Interfaces;
+using TaskBoard.Infrastructure.Data;
 using TaskBoard.Infrastructure.Repositories;
 using TaskBoard.Infrastructure.Services;
 
@@ -56,7 +58,15 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
     {
         OnMessageReceived = context =>
         {
-            context.Token = context.Request.Cookies["jwt"];
+            var cookieToken = context.Request.Cookies["jwt"];
+            var queryToken = context.Request.Query["access_token"];
+            var path = context.HttpContext.Request.Path;
+            
+            if (!string.IsNullOrEmpty(queryToken) && path.StartsWithSegments("/hubs"))
+                context.Token = queryToken;
+            else if (!string.IsNullOrEmpty(cookieToken))
+                context.Token = cookieToken;
+            
             return Task.CompletedTask;
         }
     };
@@ -80,11 +90,15 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+// Notification Board Hub
+builder.Services.AddScoped<IBoardNotificationService, BoardNotificationService>();
+
 app.UseMiddleware<ErrorHandlingMiddleware>();
 app.UseCors("AllowAll");
 app.UseHttpsRedirection();
 app.UseAuthentication(); // Must be BEFORE Authorization
 app.UseAuthorization(); // Must be AFTER Authentification
 app.MapControllers();
+app.MapHub<BoardHub>("/hubs/board");
 
 app.Run();

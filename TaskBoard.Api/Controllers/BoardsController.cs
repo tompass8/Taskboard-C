@@ -1,40 +1,55 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using TaskBoard.Domain.Entities;
-using TaskBoard.Infrastructure.Data;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using TaskBoard.Application.Interfaces;
+using TaskBoard.Application.DTOs;
+
 
 namespace TaskBoard.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class BoardsController : ControllerBase
 {
-    private readonly ApplicationDbContext _context;
+    private readonly IBoardService _boardService;
+    private readonly IBoardNotificationService _notificationService;
 
-    public BoardsController(ApplicationDbContext context)
+    public BoardsController
+        (
+        IBoardService boardService,
+        IBoardNotificationService notificationService
+        )
     {
-        _context = context;
+        _boardService = boardService;
+        _notificationService = notificationService;
     }
 
-    // GET: api/boards
-    [HttpGet]
-    public async Task<IActionResult> GetBoards()
+    [HttpGet("{workspaceId:int}")]
+    public async Task<IActionResult> GetBoards(int workspaceId)
     {
-        var boards = await _context.Boards.ToListAsync();
+        var boards = await _boardService.GetBoardsByWorkspaceAsync(workspaceId);
         return Ok(boards);
     }
 
-    // POST: api/boards
     [HttpPost]
-    public async Task<IActionResult> CreateBoard([FromBody] string title)
+    public async Task<IActionResult> CreateBoard([FromBody] CreateBoardRequest request)
     {
-        if (string.IsNullOrWhiteSpace(title))
-            return BadRequest("Titre du tableau requis.");
+        var board = await _boardService.CreateBoardAsync(request);
+        await _notificationService.NotifyCardCreated(board.ID, board);
+        return StatusCode(201, board);
+    }
 
-        var board = new Board { Title = title };
-        _context.Boards.Add(board);
-        await _context.SaveChangesAsync();
+    [HttpPatch("{id:int}")]
+    public async Task<IActionResult> UpdateBoard(int id, [FromBody] UpdateBoardRequest request)
+    {
+        var board = await _boardService.UpdateBoardAsync(id, request);
+        return Ok(board);
+    }
 
-        return CreatedAtAction(nameof(GetBoards), new { id = board.ID }, board);
+    [HttpDelete("{id:int}")]
+    public async Task<IActionResult> DeleteBoard(int id)
+    {
+        await _boardService.DeleteBoardAsync(id);
+        return NoContent();
     }
 }
