@@ -2,11 +2,13 @@ using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi;
+using Microsoft.OpenApi.Models;
 using TaskBoard.Application.Interfaces;
 using TaskBoard.Application.Services;
+using TaskBoard.Domain.Interfaces;
 using TaskBoard.Infrastructure.Data;
 using TaskBoard.Infrastructure.Repositories;
+using TaskBoard.Infrastructure.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,11 +19,14 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // ==========================================
-// 2. INJECTION DES DÉPENDANCES (Nos contrats)
+// 2. INJECTION DES DÉPENDANCES (Contrats)
 // ==========================================
-// C'est ici qu'on dit à l'API quel code utiliser quand un contrôleur demande une interface
-//builder.Services.AddScoped<IUserRepository, UserRepository>() ;
-//builder.Services.AddScoped<IAuthService, AuthService>() ;
+// Auth & Users (Code de Pedro)
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+
+// Domaines métiers (Ton code)
 builder.Services.AddScoped<IWorkspaceRepository, WorkspaceRepository>();
 builder.Services.AddScoped<IWorkspaceService, WorkspaceService>();
 builder.Services.AddScoped<IBoardRepository, BoardRepository>();
@@ -43,49 +48,59 @@ builder.Services.AddCors(options =>
 });
 
 // ==========================================
-// 4. CONFIGURATION AUTHENTIFICATION (JWT)
+// 4. CONFIGURATION AUTHENTIFICATION (JWT STRICT)
 // ==========================================
-var jwtKey = builder.Configuration["Jwt:Key"] ?? "TaCleSecreteSuperLonguePourLeDeveloppement123!"; // À adapter avec ton appsettings.json
+// On utilise le code de Pedro car il matche parfaitement avec le appsettings.json
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
         options.TokenValidationParameters = new TokenValidationParameters
         {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
-            ValidateIssuer = false,
-            ValidateAudience = false
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!)),
+            ClockSkew = TimeSpan.Zero // Supprime la tolérance de 5min
         };
     });
 
 // ==========================================
-// 5. CONFIGURATION CONTRÔLEURS ET SWAGGER
+// 5. CONFIGURATION SERVICES & SWAGGER
 // ==========================================
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSignalR(); // Ajout du SignalR de Pedro
 
-// Configuration de Swagger pour accepter les Tokens JWT (Le fameux cadenas vert !)
 // Configuration de Swagger pour accepter les Tokens JWT (Le cadenas vert !)
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "TaskBoard API", Version = "v1" });
     
-    // Nouvelle façon de déclarer la sécurité
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Description = "Format attendu : 'Bearer {ton_token_jwt}'",
         Name = "Authorization",
         In = ParameterLocation.Header,
-        Type = SecuritySchemeType.Http,
-        Scheme = "bearer",
-        BearerFormat = "JWT"
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer"
     });
     
-    // Nouvelle façon d'exiger le token (avec le mot-clé 'document')
-    c.AddSecurityRequirement(document => new OpenApiSecurityRequirement
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
-        [new OpenApiSecuritySchemeReference("Bearer", document)] = new List<string>()
-        
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
     });
 });
 
