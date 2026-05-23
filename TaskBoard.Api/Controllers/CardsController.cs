@@ -37,11 +37,14 @@ public class CardsController : ControllerBase
         return StatusCode(201, card);
     }
 
-    [HttpPatch("{id:int}")]
+    [HttpPut("{id}")]
     public async Task<IActionResult> UpdateCard(int id, [FromBody] UpdateCardRequest request)
     {
         var card = await _cardService.UpdateCardAsync(id, request);
-        await _notificationService.NotifyCardUpdated(request.BoardID, card);
+    
+        if (card == null) return NotFound();
+        await _notificationService.NotifyCardUpdated(card.ListID, card);
+    
         return Ok(card);
     }
     
