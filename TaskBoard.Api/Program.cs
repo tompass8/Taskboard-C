@@ -2,8 +2,10 @@ using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi; // <-- La clé est ici : PAS de .Models
-using Microsoft.OpenApi; // Parfois requis par Swashbuckle, on le laisse si reconnu par d'autres objets, mais on va utiliser ta syntaxe
+using Microsoft.OpenApi;
+using TaskBoard.Api.Middleware;
+using TaskBoard.Api.Hubs;
+using TaskBoard.Api.Services;
 using TaskBoard.Application.Interfaces;
 using TaskBoard.Application.Services;
 using TaskBoard.Domain.Interfaces;
@@ -14,65 +16,95 @@ using TaskBoard.Infrastructure.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 // ==========================================
-// 1. BASE DE DONNÉES
+// 1. CONFIGURATION DE LA BASE DE DONNÉES
 // ==========================================
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // ==========================================
-// 2. INJECTIONS DES DÉPENDANCES
+// 2. INJECTION DES DÉPENDANCES (Contrats)
 // ==========================================
+// Repositories
 builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
-builder.Services.AddScoped<IAuthService, AuthService>();
-
 builder.Services.AddScoped<IWorkspaceRepository, WorkspaceRepository>();
-builder.Services.AddScoped<IWorkspaceService, WorkspaceService>();
 builder.Services.AddScoped<IBoardRepository, BoardRepository>();
-builder.Services.AddScoped<IBoardService, BoardService>();
 builder.Services.AddScoped<IListRepository, ListRepository>();
+builder.Services.AddScoped<ICardRepository, CardRepository>(); // Ajout du collègue
+
+// Services
+builder.Services.AddScoped<IWorkspaceService, WorkspaceService>();
+builder.Services.AddScoped<IBoardService, BoardService>();
 builder.Services.AddScoped<IListService, ListService>();
+builder.Services.AddScoped<ICardService, CardService>(); // Ajout du collègue
 
 // ==========================================
-// 3. CORS
+// 3. CONFIGURATION CORS
 // ==========================================
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
     {
-        policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
     });
 });
 
 // ==========================================
-// 4. AUTHENTIFICATION JWT (Stricte)
+// 4. GESTION DU CRYPTAGE DU MDP (BCrypt)
 // ==========================================
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
-    {
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,
-            ValidIssuer = builder.Configuration["Jwt:Issuer"],
-            ValidAudience = builder.Configuration["Jwt:Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!)),
-            ClockSkew = TimeSpan.Zero
-        };
-    });
+builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
+builder.Services.AddScoped<IAuthService, AuthService>();
 
 // ==========================================
-// 5. SERVICES DIVERS
+// 5. CONFIGURATION AUTHENTIFICATION (JWT STRICT + SIGNALR)
+// ==========================================
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = builder.Configuration["Jwt:Issuer"],
+        ValidAudience = builder.Configuration["Jwt:Audience"],
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!)),
+        ClockSkew = TimeSpan.Zero, 
+        NameClaimType = "username"
+    };
+    
+    // Logique du collègue pour extraire le token pour SignalR ou depuis les cookies
+    options.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = context =>
+        {
+            var cookieToken = context.Request.Cookies["jwt"];
+            var queryToken = context.Request.Query["access_token"];
+            var path = context.HttpContext.Request.Path;
+            
+            if (!string.IsNullOrEmpty(queryToken) && path.StartsWithSegments("/hubs"))
+                context.Token = queryToken;
+            else if (!string.IsNullOrEmpty(cookieToken))
+                context.Token = cookieToken;
+            
+            return Task.CompletedTask;
+        }
+    };
+});
+
+// ==========================================
+// 6. GESTION DE SIGNALR
+// ==========================================
+builder.Services.AddSignalR();
+builder.Services.AddScoped<IBoardNotificationService, BoardNotificationService>();
+
+// ==========================================
+// 7. CONFIGURATION CONTRÔLEURS ET SWAGGER
 // ==========================================
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSignalR();
 
-// ==========================================
-// 6. SWAGGER (Ta syntaxe validée .NET 10)
-// ==========================================
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "TaskBoard API", Version = "v1" });
@@ -87,7 +119,6 @@ builder.Services.AddSwaggerGen(c =>
         BearerFormat = "JWT"
     });
     
-    // Ton implémentation spécifique qui compile sans erreur
     c.AddSecurityRequirement(document => new OpenApiSecurityRequirement
     {
         [new OpenApiSecuritySchemeReference("Bearer", document)] = new List<string>()
@@ -97,7 +128,7 @@ builder.Services.AddSwaggerGen(c =>
 var app = builder.Build();
 
 // ==========================================
-// 7. PIPELINE HTTP
+// 8. PIPELINE HTTP (Ordre Strict)
 // ==========================================
 if (app.Environment.IsDevelopment())
 {
@@ -105,12 +136,12 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseMiddleware<ErrorHandlingMiddleware>(); // Ajout du collègue (Doit être en premier)
 app.UseHttpsRedirection();
 app.UseCors("AllowAll");
-
 app.UseAuthentication(); 
 app.UseAuthorization();  
-
 app.MapControllers();
+app.MapHub<BoardHub>("/hubs/board"); // Mapping SignalR du collègue
 
 app.Run();

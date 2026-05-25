@@ -6,7 +6,7 @@ namespace TaskBoard.Infrastructure.Data;
 public class ApplicationDbContext : DbContext
 {
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
-
+    
     public DbSet<User> Users { get; set; }
     public DbSet<Workspace> Workspaces { get; set; }
     public DbSet<WorkspaceMembership> WorkspaceMemberships { get; set; }
@@ -21,7 +21,7 @@ public class ApplicationDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
-        // ── User ──────────────────────────────────────────────────
+        // User
         modelBuilder.Entity<User>(e =>
         {
             e.HasKey(u => u.ID);
@@ -29,7 +29,7 @@ public class ApplicationDbContext : DbContext
             e.HasIndex(u => u.Username).IsUnique();
         });
 
-        // ── WorkspaceMembership ───────────────────────────────────
+        // WorkspaceMembership
         modelBuilder.Entity<WorkspaceMembership>(e =>
         {
             e.HasKey(wm => wm.ID);
@@ -49,7 +49,7 @@ public class ApplicationDbContext : DbContext
                 .HasConversion<string>();
         });
 
-        // ── Board ─────────────────────────────────────────────────
+        // Board
         modelBuilder.Entity<Board>(e =>
         {
             e.HasKey(b => b.ID);
@@ -65,7 +65,7 @@ public class ApplicationDbContext : DbContext
                 .OnDelete(DeleteBehavior.Restrict);
         });
 
-        // ── BoardMembership ───────────────────────────────────────
+        // BoardMembership
         modelBuilder.Entity<BoardMembership>(e =>
         {
             e.HasKey(bm => bm.ID);
@@ -85,7 +85,7 @@ public class ApplicationDbContext : DbContext
                 .HasConversion<string>();
         });
 
-        // ── List ──────────────────────────────────────────────────
+        // List
         modelBuilder.Entity<List>(e =>
         {
             e.HasKey(l => l.ID);
@@ -96,7 +96,7 @@ public class ApplicationDbContext : DbContext
                 .OnDelete(DeleteBehavior.Cascade);
         });
 
-        // ── Card ──────────────────────────────────────────────────
+        // Card
         modelBuilder.Entity<Card>(e =>
         {
             e.HasKey(c => c.ID);
@@ -112,7 +112,7 @@ public class ApplicationDbContext : DbContext
                 .OnDelete(DeleteBehavior.SetNull);
         });
 
-        // ── Label ─────────────────────────────────────────────────
+        // Label
         modelBuilder.Entity<Label>(e =>
         {
             e.HasKey(l => l.ID);
@@ -123,7 +123,7 @@ public class ApplicationDbContext : DbContext
                 .OnDelete(DeleteBehavior.Cascade);
         });
 
-        // ── Activity ──────────────────────────────────────────────
+        // Activity
         modelBuilder.Entity<Activity>(e =>
         {
             e.HasKey(a => a.ID);

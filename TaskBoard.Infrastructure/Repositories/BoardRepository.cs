@@ -13,19 +13,34 @@ public class BoardRepository : IBoardRepository
     {
         _context = context;
     }
+    
+    public async Task<Board?> GetByIDAsync(int ID)
+    {
+        return await _context.Boards.FindAsync(ID);
+    }
 
-    public async Task<IEnumerable<Board>> GetBoardsByWorkspaceIdAsync(int workspaceId)
+    public async Task<IEnumerable<Board>> GetBoardsByWorkspaceIDAsync(int workspaceID)
     {
         return await _context.Boards
-            .Where(b => b.WorkspaceID == workspaceId) // C'était l'erreur ici !
+            .Where(b => b.WorkspaceID == workspaceID)
             .ToListAsync();
     }
-
-    public async Task AddAsync(Board board)
+    
+    public void Add(Board board)
     {
-        await _context.Boards.AddAsync(board);
+        _context.Boards.Add(board);
     }
 
+    public void Update(Board board)
+    {
+        _context.Boards.Update(board);
+    }
+    
+    public void Delete(Board board)
+    {
+        _context.Boards.Remove(board);
+    }
+    
     public async Task SaveChangesAsync()
     {
         await _context.SaveChangesAsync();

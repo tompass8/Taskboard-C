@@ -1,16 +1,16 @@
-﻿using System.Security.Claims;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TaskBoard.Application.DTOs.Boards;
 using TaskBoard.Application.Interfaces;
 
 namespace TaskBoard.Api.Controllers;
 
-// [Authorize] // ⚠️ Retire les '//' quand ton système de connexion JWT sera prêt !
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class BoardsController : ControllerBase
 {
+    // On injecte le service applicatif à la place du DbContext
     private readonly IBoardService _boardService;
 
     public BoardsController(IBoardService boardService)
@@ -20,10 +20,10 @@ public class BoardsController : ControllerBase
 
     // GET : api/boards/workspace/5
     // On utilise une route spécifique pour récupérer les tableaux d'un espace précis
-    [HttpGet("workspace/{workspaceId}")]
-    public async Task<IActionResult> GetBoards(int workspaceId)
+    [HttpGet("workspace/{workspaceID}")]
+    public async Task<IActionResult> GetBoardsByWorkspace(int workspaceID)
     {
-        var boards = await _boardService.GetBoardsByWorkspaceIdAsync(workspaceId);
+        var boards = await _boardService.GetBoardsByWorkspaceIDAsync(workspaceId);
         return Ok(boards);
     }
 
@@ -31,22 +31,25 @@ public class BoardsController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> CreateBoard([FromBody] CreateBoardRequest request)
     {
-        if (!ModelState.IsValid)
-            return BadRequest(ModelState);
-
-        // 🛑 BLOC DE TEST : À SUPPRIMER QUAND L'AUTH SERA CODÉE
-        // On force un Guid puisque Lucas a défini OwnerID comme un Guid dans l'entité Board
-        Guid userId = Guid.Parse("11111111-1111-1111-1111-111111111111");
-
-        /* 🟢 VRAI CODE À DÉCOMMENTER PLUS TARD
-        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (!Guid.TryParse(userIdString, out Guid userId))
-            return Unauthorized("Token invalide ou utilisateur introuvable.");
-        */
-
-        var newBoard = await _boardService.CreateBoardAsync(request, userId);
+        var createdBoard = await _boardService.CreateBoardAsync(request);
         
-        // Renvoie un code 201 Created avec l'URL pour consulter le nouveau tableau
-        return CreatedAtAction(nameof(GetBoards), new { workspaceId = newBoard.WorkspaceID }, newBoard);
+        // Renvoie un code 201 Created avec le DTO de réponse
+        return CreatedAtAction(nameof(GetBoardsByWorkspace), new { workspaceID = createdBoard.WorkspaceID }, createdBoard);
+    }
+
+    [HttpPut("{ID}")]
+    public async Task<IActionResult> UpdateBoard(int id, [FromBody] UpdateBoardRequest request)
+    {
+        var updatedBoard = await _boardService.UpdateBoardAsync(ID, request);
+        if (updatedBoard == null) return NotFound();
+
+        return Ok(updatedBoard);
+    }
+
+    [HttpDelete("{ID}")]
+    public async Task<IActionResult> DeleteBoard(int ID)
+    {
+        await _boardService.DeleteBoardAsync(ID);
+        return NoContent();
     }
 }

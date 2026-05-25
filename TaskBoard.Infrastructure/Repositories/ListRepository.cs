@@ -14,17 +14,27 @@ public class ListRepository : IListRepository
         _context = context;
     }
 
-    public async Task<IEnumerable<List>> GetListsByBoardIdAsync(int boardId)
+    public async Task<List?> GetByIDAsync(int ID)
+    {
+        return await _context.Lists.FindAsync(ID);
+    }
+    
+    public async Task<IEnumerable<List>> GetListsByBoardIDAsync(int boardID)
     {
         // On récupère toutes les listes liées à cet ID de tableau
         return await _context.Lists
-            .Where(l => l.BoardID == boardId)
+            .Where(l => l.BoardID == boardID)
             .ToListAsync();
     }
-
+    
     public async Task AddAsync(List list)
     {
         await _context.Lists.AddAsync(list);
+    }
+
+    public void Update(List list)
+    {
+        _context.Lists.Update(list);
     }
 
     public async Task SaveChangesAsync()

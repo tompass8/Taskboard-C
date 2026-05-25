@@ -4,12 +4,11 @@ namespace TaskBoard.Application.Interfaces;
 
 public interface IListRepository
 {
-    // Récupérer toutes les listes qui appartiennent à un tableau précis
-    Task<IEnumerable<List>> GetListsByBoardIdAsync(int boardId);
+    Task<List?> GetByIdAsync(int ID);
+    Task<IEnumerable<List>> GetListsByBoardIDAsync(int boardID);
     
-    // Ajouter une nouvelle liste
+    void Update(List list);
     Task AddAsync(List list);
     
-    // Sauvegarder les modifications en base
     Task SaveChangesAsync();
 }

@@ -4,12 +4,15 @@ namespace TaskBoard.Application.Interfaces;
 
 public interface IBoardRepository
 {
-    // On récupère les tableaux liés à un Espace de travail précis (ID en 'int' !)
-    Task<IEnumerable<Board>> GetBoardsByWorkspaceIdAsync(int workspaceId);
+    Task<Board?> GetByIdAsync(int ID);
+    Task<IEnumerable<Board>> GetBoardsByWorkspaceIDAsync(int workspaceID);
     
-    // On prépare l'ajout d'un nouveau tableau
     Task AddAsync(Board board);
-    
-    // On sauvegarde les changements
     Task SaveChangesAsync();
+    
+    void Add(Board board);
+    void Update(Board board);
+    void Delete(Board board);
+
+
 }
