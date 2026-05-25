@@ -14,4 +14,4 @@ public class Workspace
     public ICollection<WorkspaceMembership> WorkspaceMemberships { get; set; } = new List<WorkspaceMembership>();
     public ICollection<Board> Boards { get; set; } = new List<Board>();
     
-}
+} 

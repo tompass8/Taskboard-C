@@ -23,8 +23,8 @@ public class WorkspacesController : ControllerBase
     {
         var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
         
-        // 1. On transforme la chaîne du Token en 'int' (entier)
-        if (!int.TryParse(userIdString, out int userId))
+        // Extraction propre du Guid depuis le JWT
+        if (!Guid.TryParse(userIdString, out Guid userId))
             return Unauthorized("Token invalide ou utilisateur introuvable.");
 
         var workspaces = await _workspaceService.GetUserWorkspacesAsync(userId);
@@ -39,13 +39,12 @@ public class WorkspacesController : ControllerBase
 
         var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
         
-        // 2. Pareil ici, on passe en 'int'
-        if (!int.TryParse(userIdString, out int userId))
+        // Extraction propre du Guid depuis le JWT
+        if (!Guid.TryParse(userIdString, out Guid userId))
             return Unauthorized("Token invalide.");
 
         var newWorkspace = await _workspaceService.CreateWorkspaceAsync(request, userId);
         
-        // 3. On utilise .ID (majuscule) pour coller au code de Lucas
         return CreatedAtAction(nameof(GetMyWorkspaces), new { id = newWorkspace.ID }, newWorkspace);
     }
 }

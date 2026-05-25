@@ -14,7 +14,7 @@ public class ListRepository : IListRepository
         _context = context;
     }
 
-    public async Task<List?> GetByIDAsync(int ID)
+    public async Task<List?> GetByIdAsync(int ID)
     {
         return await _context.Lists.FindAsync(ID);
     }

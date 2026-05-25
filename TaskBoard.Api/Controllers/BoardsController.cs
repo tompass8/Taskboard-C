@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TaskBoard.Application.DTOs.Boards;
 using TaskBoard.Application.Interfaces;
@@ -10,7 +11,6 @@ namespace TaskBoard.Api.Controllers;
 [Authorize]
 public class BoardsController : ControllerBase
 {
-    // On injecte le service applicatif à la place du DbContext
     private readonly IBoardService _boardService;
 
     public BoardsController(IBoardService boardService)
@@ -18,27 +18,30 @@ public class BoardsController : ControllerBase
         _boardService = boardService;
     }
 
-    // GET : api/boards/workspace/5
-    // On utilise une route spécifique pour récupérer les tableaux d'un espace précis
     [HttpGet("workspace/{workspaceID}")]
     public async Task<IActionResult> GetBoardsByWorkspace(int workspaceID)
     {
-        var boards = await _boardService.GetBoardsByWorkspaceIDAsync(workspaceId);
+        // Correction de la casse : workspaceID
+        var boards = await _boardService.GetBoardsByWorkspaceIDAsync(workspaceID);
         return Ok(boards);
     }
 
-    // POST : api/boards
     [HttpPost]
     public async Task<IActionResult> CreateBoard([FromBody] CreateBoardRequest request)
     {
-        var createdBoard = await _boardService.CreateBoardAsync(request);
+        // 1. Extraction du Guid depuis le Token
+        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!Guid.TryParse(userIdString, out Guid userId))
+            return Unauthorized("Token invalide.");
+
+        // 2. Passage du userId au service
+        var createdBoard = await _boardService.CreateBoardAsync(request, userId);
         
-        // Renvoie un code 201 Created avec le DTO de réponse
         return CreatedAtAction(nameof(GetBoardsByWorkspace), new { workspaceID = createdBoard.WorkspaceID }, createdBoard);
     }
 
-    [HttpPut("{ID}")]
-    public async Task<IActionResult> UpdateBoard(int id, [FromBody] UpdateBoardRequest request)
+    [HttpPut("{ID:int}")]
+    public async Task<IActionResult> UpdateBoard(int ID, [FromBody] UpdateBoardRequest request)
     {
         var updatedBoard = await _boardService.UpdateBoardAsync(ID, request);
         if (updatedBoard == null) return NotFound();
@@ -46,7 +49,7 @@ public class BoardsController : ControllerBase
         return Ok(updatedBoard);
     }
 
-    [HttpDelete("{ID}")]
+    [HttpDelete("{ID:int}")]
     public async Task<IActionResult> DeleteBoard(int ID)
     {
         await _boardService.DeleteBoardAsync(ID);

@@ -33,7 +33,7 @@ public class BoardService : IBoardService
             Title = request.Title,
             Description = request.Description,
             WorkspaceID = request.WorkspaceID,
-            OwnerID = userID
+            OwnerID = userId
         };
 
         await _boardRepository.AddAsync(board);
@@ -49,9 +49,9 @@ public class BoardService : IBoardService
         };
     }
     
-    public async Task<BoardResponse?> UpdateBoardAsync(int id, UpdateBoardRequest request)
+    public async Task<BoardDto?> UpdateBoardAsync(int ID, UpdateBoardRequest request)
     {
-        var board = await _boardRepository.GetByIdAsync(id);
+        var board = await _boardRepository.GetByIdAsync(ID);
         if (board == null) return null;
 
         if (request.Title != null) board.Title = request.Title;
@@ -60,13 +60,20 @@ public class BoardService : IBoardService
         _boardRepository.Update(board);
         await _boardRepository.SaveChangesAsync();
 
-        return new BoardResponse(board.ID, board.Title, board.Description, board.WorkspaceID);
+        return new BoardDto
+        {
+            ID = board.ID,
+            Title = board.Title,
+            Description = board.Description,
+            WorkspaceID = board.WorkspaceID,
+            CreatedAt = board.CreatedAt
+        };
     }
 
  
-    public async Task DeleteBoardAsync(int id)
+    public async Task DeleteBoardAsync(int ID)
     {
-        var board = await _boardRepository.GetByIdAsync(id);
+        var board = await _boardRepository.GetByIdAsync(ID);
         if (board == null) return;
 
         _boardRepository.Delete(board);

@@ -14,7 +14,7 @@ public class BoardRepository : IBoardRepository
         _context = context;
     }
     
-    public async Task<Board?> GetByIDAsync(int ID)
+    public async Task<Board?> GetByIdAsync(int ID)
     {
         return await _context.Boards.FindAsync(ID);
     }
@@ -29,6 +29,11 @@ public class BoardRepository : IBoardRepository
     public void Add(Board board)
     {
         _context.Boards.Add(board);
+    }
+
+    public async Task AddAsync(Board board)
+    {
+        await _context.Boards.AddAsync(board);
     }
 
     public void Update(Board board)

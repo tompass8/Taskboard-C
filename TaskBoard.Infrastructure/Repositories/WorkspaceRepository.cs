@@ -14,11 +14,12 @@ public class WorkspaceRepository : IWorkspaceRepository
         _context = context;
     }
 
-    public async Task<IEnumerable<Workspace>> GetUserWorkspacesAsync(int userId)
+    public async Task<IEnumerable<Workspace>> GetUserWorkspacesAsync(Guid userId)
     {
-        // Pour l'instant, on récupère tout pour désactiver l'erreur. 
-        // On affinera la requête quand on verra comment Lucas a codé WorkspaceMembership
-        return await _context.Workspaces.ToListAsync();
+        // Sécurité : On retourne uniquement les workspaces liés à ce Guid
+        return await _context.Workspaces
+            .Where(w => w.WorkspaceMemberships.Any(m => m.UserID == userId))
+            .ToListAsync();
     }
 
     public async Task AddAsync(Workspace workspace)

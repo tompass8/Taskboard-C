@@ -55,10 +55,10 @@ public class ListService : IListService
         if (list == null) return;
 
         int oldPosition = list.Position;
-        int boardId = list.BoardID;
+        int boardID = list.BoardID;
 
         // 2. Récupérer toutes les listes du même tableau pour calculer les décalages
-        var allLists = await _listRepository.GetByBoardIdAsync(boardID);
+        var allLists = await _listRepository.GetListsByBoardIDAsync(boardID);
 
         // 3. Cas A : Déplacement de la colonne vers la droite (ex: position 1 à 3)
         if (oldPosition < newPosition)

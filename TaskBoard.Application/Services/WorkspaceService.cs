@@ -13,27 +13,30 @@ public class WorkspaceService : IWorkspaceService
         _workspaceRepository = workspaceRepository;
     }
 
-    public async Task<IEnumerable<WorkspaceDto>> GetUserWorkspacesAsync(int userId)
+    public async Task<IEnumerable<WorkspaceDto>> GetUserWorkspacesAsync(Guid userId)
     {
         var workspaces = await _workspaceRepository.GetUserWorkspacesAsync(userId);
         return workspaces.Select(w => new WorkspaceDto
         {
-            ID = w.ID, // Modifié selon le code de Lucas
+            ID = w.ID,
             Name = w.Name,
             Description = w.Description
         });
     }
 
-    public async Task<WorkspaceDto> CreateWorkspaceAsync(CreateWorkspaceRequest request, int userId)
+    public async Task<WorkspaceDto> CreateWorkspaceAsync(CreateWorkspaceRequest request, Guid userId)
     {
         var workspace = new Workspace
         {
             Name = request.Name,
             Description = request.Description
-            // Id, OwnerId et CreatedAt ont été retirés
         };
 
-        // Note pour plus tard : Il faudra lier le userId via la table WorkspaceMembership ici !
+        workspace.WorkspaceMemberships.Add(new WorkspaceMembership
+        {
+            UserID = userId,
+            Role = Role.Admin
+        });
 
         await _workspaceRepository.AddAsync(workspace);
         await _workspaceRepository.SaveChangesAsync();
