@@ -44,7 +44,7 @@ public class WorkspaceService : IWorkspaceService
             Workspace = workspace
         });
 
-                await _workspaceRepository.AddAsync(workspace);
+        await _workspaceRepository.AddAsync(workspace);
         await _workspaceRepository.SaveChangesAsync();
 
         return new WorkspaceDto
