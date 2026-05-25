@@ -22,10 +22,10 @@ public class CardsController : ControllerBase
         _notificationService = notificationService;
     }
 
-    [HttpGet("{id:int}")]
-    public async Task<IActionResult> GetCard(int id)
+    [HttpGet("{ID:int}")]
+    public async Task<IActionResult> GetCard(int ID)
     {
-        var card = await _cardService.GetCardAsync(id);
+        var card = await _cardService.GetCardAsync(ID);
         return Ok(card);
     }
 
@@ -37,10 +37,10 @@ public class CardsController : ControllerBase
         return StatusCode(201, card);
     }
 
-    [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateCard(int id, [FromBody] UpdateCardRequest request)
+    [HttpPut("{ID}")]
+    public async Task<IActionResult> UpdateCard(int ID, [FromBody] UpdateCardRequest request)
     {
-        var card = await _cardService.UpdateCardAsync(id, request);
+        var card = await _cardService.UpdateCardAsync(ID, request);
     
         if (card == null) return NotFound();
         await _notificationService.NotifyCardUpdated(card.ListID, card);
@@ -48,24 +48,24 @@ public class CardsController : ControllerBase
         return Ok(card);
     }
     
-    [HttpPatch("{id:int}/position")]
-    public async Task<IActionResult> UpdateCardPosition(int id, [FromBody] UpdatePositionRequest request)
+    [HttpPatch("{ID:int}/position")]
+    public async Task<IActionResult> UpdateCardPosition(int ID, [FromBody] UpdatePositionRequest request)
     {
-        await _cardService.UpdateCardPositionAsync(id, request.Position, request.ListID);
+        await _cardService.UpdateCardPositionAsync(ID, request.Position, request.ListID);
         await _notificationService.NotifyCardMoved(request.BoardID, new
         {
-            cardID = id,
+            cardID = ID,
             request.Position,
             request.ListID
         });
         return NoContent();
     }
 
-    [HttpDelete("{id:int}")]
-    public async Task<IActionResult> DeleteCard(int id, [FromQuery] int boardID)
+    [HttpDelete("{ID:int}")]
+    public async Task<IActionResult> DeleteCard(int ID, [FromQuery] int boardID)
     {
-        await _cardService.DeleteCardAsync(id);
-        await _notificationService.NotifyCardDeleted(boardID, new { cardID = id });
+        await _cardService.DeleteCardAsync(ID);
+        await _notificationService.NotifyCardDeleted(boardID, new { cardID = ID });
         return NoContent();
     }
 }
