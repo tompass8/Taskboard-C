@@ -23,7 +23,7 @@ public class WorkspacesController : ControllerBase
     {
         var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
         
-        // Extraction propre du Guid depuis le JWT
+        // Transforme la chaîne du Token en 'Guid'
         if (!Guid.TryParse(userIdString, out Guid userId))
             return Unauthorized("Token invalide ou utilisateur introuvable.");
 
@@ -39,12 +39,61 @@ public class WorkspacesController : ControllerBase
 
         var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
         
-        // Extraction propre du Guid depuis le JWT
         if (!Guid.TryParse(userIdString, out Guid userId))
             return Unauthorized("Token invalide.");
 
         var newWorkspace = await _workspaceService.CreateWorkspaceAsync(request, userId);
         
         return CreatedAtAction(nameof(GetMyWorkspaces), new { id = newWorkspace.ID }, newWorkspace);
+    }
+
+    [HttpGet("{workspaceId}/members")]
+    public async Task<IActionResult> GetWorkspaceMembers(int workspaceId)
+    {
+        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!Guid.TryParse(userIdString, out Guid userId))
+            return Unauthorized("Token invalide ou utilisateur introuvable.");
+
+        var members = await _workspaceService.GetWorkspaceMembersAsync(workspaceId, userId);
+        return Ok(members);
+    }
+
+    [HttpPost("{workspaceId}/members")]
+    public async Task<IActionResult> AddWorkspaceMember(int workspaceId, [FromBody] CreateWorkspaceMembershipRequest request)
+    {
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+
+        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!Guid.TryParse(userIdString, out Guid requesterId))
+            return Unauthorized("Token invalide ou utilisateur introuvable.");
+
+        var member = await _workspaceService.AddWorkspaceMemberAsync(workspaceId, request, requesterId);
+        return CreatedAtAction(nameof(GetWorkspaceMembers), new { workspaceId }, member);
+    }
+
+    [HttpPatch("{workspaceId}/members/{memberUserId}/role")]
+    public async Task<IActionResult> UpdateWorkspaceMemberRole(int workspaceId, Guid memberUserId, [FromBody] UpdateWorkspaceMembershipRoleRequest request)
+    {
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+
+        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!Guid.TryParse(userIdString, out Guid requesterId))
+            return Unauthorized("Token invalide ou utilisateur introuvable.");
+
+        var updated = await _workspaceService.UpdateWorkspaceMemberRoleAsync(workspaceId, memberUserId, request, requesterId);
+        return Ok(updated);
+    }
+
+    [HttpDelete("{workspaceId}/members/{memberUserId}")]
+    public async Task<IActionResult> RemoveWorkspaceMember(int workspaceId, Guid memberUserId)
+    {
+        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!Guid.TryParse(userIdString, out Guid requesterId))
+            return Unauthorized("Token invalide ou utilisateur introuvable.");
+
+        await _workspaceService.RemoveWorkspaceMemberAsync(workspaceId, memberUserId, requesterId);
+        return NoContent();
     }
 }
