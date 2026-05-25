@@ -18,7 +18,7 @@ public class CardService : ICardService
         return await _cardRepository.GetByIDAsync(ID);
     }
 
-    public async Task<Card> CreateCardAsync(CreateCardRequest request)
+    public async Task<Card> CreateCardAsync(CreateCardRequest request, Guid userID)
     {
         // Récupérer les cartes existantes pour placer la nouvelle en fin de liste
         var existingCards = await _cardRepository.GetByListIDAsync(request.ListID);
@@ -30,7 +30,8 @@ public class CardService : ICardService
             Description = request.Description,
             Deadline = request.Deadline,
             ListID = request.ListID,
-            Position = nextPosition
+            Position = nextPosition,
+            AssignedUserID = userID
         };
 
         _cardRepository.Add(card);
@@ -86,7 +87,7 @@ public class CardService : ICardService
         // Cas 2 : Déplacement vers une autre colonne (Changement de statut)
         else
         {
-            // 1. Décaler vers le bas les cartes de la colonne de destination
+            // Décaler vers le bas les cartes de la colonne de destination
             var targetCards = await _cardRepository.GetByListIDAsync(targetListID);
             foreach (var c in targetCards.Where(c => c.Position >= newPosition))
             {
@@ -94,7 +95,7 @@ public class CardService : ICardService
                 _cardRepository.Update(c);
             }
 
-            // 2. Combler le vide dans la colonne d'origine
+            // Comble le vide dans la colonne d'origine
             var sourceCards = await _cardRepository.GetByListIDAsync(oldListID);
             foreach (var c in sourceCards.Where(c => c.Position > oldPosition))
             {
@@ -115,7 +116,7 @@ public class CardService : ICardService
         var card = await _cardRepository.GetByIDAsync(ID);
         if (card == null) return;
 
-        // Réordonner les cartes restantes sous la carte supprimée
+        // Réordonne les cartes restantes sous la carte supprimée
         var siblings = await _cardRepository.GetByListIDAsync(card.ListID);
         foreach (var c in siblings.Where(c => c.Position > card.Position))
         {

@@ -12,6 +12,17 @@ public class BoardService : IBoardService
     {
         _boardRepository = boardRepository;
     }
+    
+    public async Task<BoardResponse?> GetBoardByIDAsync(int ID)
+    {
+        // Appelle le repository pour chercher le tableau en BDD
+        var board = await _boardRepository.GetByIDAsync(ID); 
+    
+        if (board == null) return null;
+    
+        // Transforme l'entité Domain en DTO de réponse pour le contrôleur
+        return new BoardResponse(board.ID, board.Title, board.Description, board.WorkspaceID, board.OwnerID);
+    }
 
     public async Task<IEnumerable<BoardDto>> GetBoardsByWorkspaceIDAsync(int workspaceID)
     {
@@ -26,7 +37,7 @@ public class BoardService : IBoardService
         });
     }
 
-    public async Task<BoardDto> CreateBoardAsync(CreateBoardRequest request, Guid userId)
+    public async Task<BoardDto> CreateBoardAsync(CreateBoardRequest request, Guid userID)
     {
         var board = new Board
         {
@@ -36,7 +47,7 @@ public class BoardService : IBoardService
             OwnerID = userID
         };
 
-        await _boardRepository.AddAsync(board);
+        _boardRepository.Add(board);
         await _boardRepository.SaveChangesAsync();
 
         return new BoardDto
@@ -49,9 +60,9 @@ public class BoardService : IBoardService
         };
     }
     
-    public async Task<BoardResponse?> UpdateBoardAsync(int id, UpdateBoardRequest request)
+    public async Task<BoardResponse?> UpdateBoardAsync(int ID, UpdateBoardRequest request)
     {
-        var board = await _boardRepository.GetByIdAsync(id);
+        var board = await _boardRepository.GetByIDAsync(ID);
         if (board == null) return null;
 
         if (request.Title != null) board.Title = request.Title;
@@ -60,13 +71,12 @@ public class BoardService : IBoardService
         _boardRepository.Update(board);
         await _boardRepository.SaveChangesAsync();
 
-        return new BoardResponse(board.ID, board.Title, board.Description, board.WorkspaceID);
+        return new BoardResponse(board.ID, board.Title, board.Description, board.WorkspaceID,  board.OwnerID);
     }
-
- 
-    public async Task DeleteBoardAsync(int id)
+    
+    public async Task DeleteBoardAsync(int ID)
     {
-        var board = await _boardRepository.GetByIdAsync(id);
+        var board = await _boardRepository.GetByIDAsync(ID);
         if (board == null) return;
 
         _boardRepository.Delete(board);

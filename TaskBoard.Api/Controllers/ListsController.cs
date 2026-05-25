@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using TaskBoard.Api.Extensions;
+using TaskBoard.Application.DTOs;
 using TaskBoard.Application.DTOs.Lists;
 using TaskBoard.Application.Interfaces;
 
@@ -19,30 +21,22 @@ public class ListsController : ControllerBase
         _notificationService = notificationService;
     }
     
-    // GET : api/lists/board/5
     // Récupère toutes les listes pour un Board spécifique
     [HttpGet("board/{boardID}")]
     public async Task<IActionResult> GetListsByBoard(int boardID)
     {
-        var lists = await _listService.GetListsByBoardIdAsync(boardID);
+        var lists = await _listService.GetListsByBoardIDAsync(boardID);
         return Ok(lists);
     }
-
-    // POST : api/lists
-    // Crée une nouvelle liste
+    
     [HttpPost]
     public async Task<IActionResult> CreateList([FromBody] CreateListRequest request)
     {
-        if (!ModelState.IsValid)
-            return BadRequest(ModelState);
-
-        //  BLOC DE TEST TEMPORAIRE
-        // En attendant le système d'authentification final
-        Guid userID = Guid.Parse("11111111-1111-1111-1111-111111111111");
+        Guid userID = User.GetUserID();
 
         var newList = await _listService.CreateListAsync(request, userID);
-        
-        // On renvoie un code HTTP 201 (Created)
+        await _notificationService.NotifyListCreated(request.BoardID, newList);
+
         return CreatedAtAction(nameof(GetListsByBoard), new { boardID = newList.BoardID }, newList);
     }
     

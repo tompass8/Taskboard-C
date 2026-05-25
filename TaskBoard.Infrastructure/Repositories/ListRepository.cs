@@ -27,16 +27,21 @@ public class ListRepository : IListRepository
             .ToListAsync();
     }
     
-    public async Task AddAsync(List list)
+    public void Add(List list)
     {
-        await _context.Lists.AddAsync(list);
+        _context.Lists.Add(list);
     }
 
     public void Update(List list)
     {
         _context.Lists.Update(list);
     }
-
+    
+    public void Delete(List list)
+    {
+        _context.Lists.Remove(list);
+    }
+    
     public async Task SaveChangesAsync()
     {
         await _context.SaveChangesAsync();

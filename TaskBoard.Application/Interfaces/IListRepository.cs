@@ -4,11 +4,9 @@ namespace TaskBoard.Application.Interfaces;
 
 public interface IListRepository
 {
-    Task<List?> GetByIdAsync(int ID);
+    Task<List?> GetByIDAsync(int ID);
     Task<IEnumerable<List>> GetListsByBoardIDAsync(int boardID);
-    
     void Update(List list);
-    Task AddAsync(List list);
-    
+    void Add(List list);
     Task SaveChangesAsync();
 }

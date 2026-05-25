@@ -15,7 +15,7 @@ public class AuthService : IAuthService
     private readonly IUserRepository _userRepository;
     private readonly IConfiguration _configuration;
     private readonly IPasswordHasher _passwordHasher;
-
+    
     private string GenerateToken(User user)
     {
         var key = new SymmetricSecurityKey

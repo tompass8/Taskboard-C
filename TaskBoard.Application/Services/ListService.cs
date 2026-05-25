@@ -28,18 +28,20 @@ public class ListService : IListService
 
     public async Task<ListDto> CreateListAsync(CreateListRequest request, Guid userID)
     {
-        // On instancie la vraie entité du Domaine
+        // Récupère les listes existantes pour définir la position de la nouvelle colonne
+        var existingLists = await _listRepository.GetListsByBoardIDAsync(request.BoardID);
+        int nextPosition = existingLists.Count(); // Si 0 listes -> position 0, si 2 listes -> position 2 (index 0, 1, 2)
+
         var list = new List
         {
             Title = request.Title,
-            BoardID = request.BoardID
+            BoardID = request.BoardID,
+            Position = nextPosition // Assure la persistance pour le Drag & Drop
         };
 
-        // On sauvegarde via le Repository
-        await _listRepository.AddAsync(list);
+        _listRepository.Add(list);
         await _listRepository.SaveChangesAsync();
 
-        // On retourne l'objet propre pour l'API
         return new ListDto
         {
             ID = list.ID,
@@ -50,17 +52,17 @@ public class ListService : IListService
     
     public async Task UpdateListPositionAsync(int listID, int newPosition)
     {
-        // 1. Récupérer la liste (colonne) cible à déplacer
-        var list = await _listRepository.GetByIdAsync(listID);
+        // Récupère la liste cible à déplacer
+        var list = await _listRepository.GetByIDAsync(listID);
         if (list == null) return;
 
         int oldPosition = list.Position;
-        int boardId = list.BoardID;
+        int boardID = list.BoardID;
 
-        // 2. Récupérer toutes les listes du même tableau pour calculer les décalages
-        var allLists = await _listRepository.GetByBoardIdAsync(boardID);
+        // Récupère toutes les listes du même tableau pour calculer les décalages
+        var allLists = await _listRepository.GetListsByBoardIDAsync(boardID);
 
-        // 3. Cas A : Déplacement de la colonne vers la droite (ex: position 1 à 3)
+        // Cas A : Déplacement de la colonne vers la droite (ex: position 1 à 3)
         if (oldPosition < newPosition)
         {
             var listsToShift = allLists.Where(l => l.Position > oldPosition && l.Position <= newPosition);
@@ -70,7 +72,7 @@ public class ListService : IListService
                 _listRepository.Update(l); // Prépare le décalage vers la gauche
             }
         }
-        // 4. Cas B : Déplacement de la colonne vers la gauche (ex: position 3 à 1)
+        // Cas B : Déplacement de la colonne vers la gauche (ex: position 3 à 1)
         else if (oldPosition > newPosition)
         {
             var listsToShift = allLists.Where(l => l.Position >= newPosition && l.Position < oldPosition);
@@ -81,11 +83,11 @@ public class ListService : IListService
             }
         }
 
-        // 5. Assigner la nouvelle position finale à la liste déplacée
+        // Assigne la nouvelle position finale à la liste déplacée
         list.Position = newPosition;
         _listRepository.Update(list);
 
-        // 6. Sauvegarder toutes les modifications en une seule transaction SQL
+        // Sauvegarde toutes les modifications en une seule transaction SQL
         await _listRepository.SaveChangesAsync();
     }
 }

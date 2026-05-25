@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using TaskBoard.Api.Extensions;
 using TaskBoard.Application.Interfaces;
 using TaskBoard.Application.DTOs;
 
@@ -32,7 +33,9 @@ public class CardsController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> CreateCard([FromBody] CreateCardRequest request)
     {
-        var card = await _cardService.CreateCardAsync(request);
+        Guid userID = User.GetUserID();
+        
+        var card = await _cardService.CreateCardAsync(request,  userID);
         await _notificationService.NotifyCardCreated(request.BoardID, card);
         return StatusCode(201, card);
     }
