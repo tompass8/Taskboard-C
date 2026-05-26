@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using TaskBoard.Application.DTOs;
 using TaskBoard.Application.DTOs.Lists;
 using TaskBoard.Application.Interfaces;
 

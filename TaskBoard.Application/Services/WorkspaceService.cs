@@ -15,6 +15,7 @@ public class WorkspaceService : IWorkspaceService
         IUserRepository userRepository)
     {
         _workspaceRepository = workspaceRepository;
+        _userRepository = userRepository;
     }
 
     public async Task<IEnumerable<WorkspaceDto>> GetUserWorkspacesAsync(Guid userId)
