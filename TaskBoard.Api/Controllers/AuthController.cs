@@ -12,7 +12,6 @@ public class AuthController : ControllerBase
     private readonly IAuthService _authService;
     private readonly IWebHostEnvironment _env;
 
-
     public AuthController(IAuthService authService, IWebHostEnvironment env)
     {
         _authService = authService;
@@ -24,6 +23,7 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> Register([FromBody] RegisterRequest request)
     {
         var response = await _authService.RegisterAsync(request);
+        // On renvoie l'objet AuthResponse COMPLET (avec le Token)
         return StatusCode(201, response);
     }
 
@@ -32,29 +32,17 @@ public class AuthController : ControllerBase
     {
         var response = await _authService.LoginAsync(request);
         
-        Response.Cookies.Append("jwt", response.Token, new CookieOptions
-        {
-            HttpOnly = true,
-            Secure = !_env.IsDevelopment(),
-            SameSite =  SameSiteMode.Strict,
-            Expires = DateTimeOffset.Now.AddMinutes(30)
-        });
-        
-        return Ok(new { response.Username, response.UserID });
+        // On renvoie l'objet AuthResponse COMPLET (avec le Token)
+        // C'est ça qui manquait pour que le Javascript le trouve !
+        return Ok(response);
     }
     
     [HttpPost("logout")]
     [Authorize]
     public IActionResult Logout()
     {
-        Response.Cookies.Append("jwt", "", new CookieOptions
-        {
-            HttpOnly = true,
-            Secure = !_env.IsDevelopment(),
-            SameSite = SameSiteMode.Strict,
-            Expires = DateTimeOffset.Now.AddDays(-1) // past datetime = deletion
-        });
-
+        // Avec le système LocalStorage, la déconnexion se gère à 100% côté Javascript
+        // en supprimant le token du navigateur. L'API a juste besoin de dire OK.
         return Ok(new { message = "Déconnexion réussie." });
     }
 }

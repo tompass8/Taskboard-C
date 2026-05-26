@@ -42,11 +42,12 @@ builder.Services.AddScoped<ICardService, CardService>(); // Ajout du collègue
 // ==========================================
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAll", policy =>
+    options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.AllowAnyOrigin()
-              .AllowAnyMethod()
-              .AllowAnyHeader();
+        policy.WithOrigins("http://localhost:5173") //  frontend
+            .AllowAnyMethod()
+            .AllowAnyHeader()
+            .AllowCredentials(); 
     });
 });
 
@@ -108,7 +109,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "TaskBoard API", Version = "v1" });
-    
+    c.CustomSchemaIds(type => type.FullName);
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Description = "Format attendu : 'Bearer {ton_token_jwt}'",
@@ -138,7 +139,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseMiddleware<ErrorHandlingMiddleware>(); // Ajout du collègue (Doit être en premier)
 app.UseHttpsRedirection();
-app.UseCors("AllowAll");
+app.UseCors("AllowFrontend");
 app.UseAuthentication(); 
 app.UseAuthorization();  
 app.MapControllers();
